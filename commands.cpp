@@ -116,8 +116,7 @@ PreparedCommand CommandsModule::prepareCommand(string command)
 	if(cmd->argc > split.size())
 		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
 	CommandArg* args = ::getCommandArgs(split, cmd->argTypes);
-	PreparedCommand ret(cmd->func, (int) (split.size() - 1), args);
-	return ret;
+	return PreparedCommand(cmd->func, (int) (split.size() - 1), args);
 }
 
 bool CommandsModule::runCommand(string command)
@@ -148,14 +147,13 @@ PreparedCommand::PreparedCommand(const void (*func)(const int argc, const Comman
 }
 PreparedCommand::~PreparedCommand()
 { 
-	cout << "destructor called" << endl;
 	if(argv != nullptr)
 		delete[] argv;
 }
-PreparedCommand::PreparedCommand(const PreparedCommand & obj)
+PreparedCommand::PreparedCommand(PreparedCommand & obj)
 {
-	cout << "copy constructor" << endl;
 	func = obj.func;
 	argc = obj.argc;
 	argv = obj.argv;
+	obj.argv = nullptr;
 }

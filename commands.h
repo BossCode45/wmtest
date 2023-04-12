@@ -43,8 +43,7 @@ class PreparedCommand
 		const CommandArg* argv = nullptr;
 		PreparedCommand(const void (*func)(const int argc, const CommandArg* argv), int argc, const CommandArg* argv);
 		~PreparedCommand();
-		PreparedCommand(const PreparedCommand & obj);
-		PreparedCommand(PreparedCommand && obj);
+		PreparedCommand(PreparedCommand & obj);
 };
 
 class CommandsModule
