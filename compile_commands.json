@@ -1,0 +1,15 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++17",
+      "-c",
+      "-o",
+      "main.o",
+      "main.cpp"
+    ],
+    "directory": "/home/boss/Documents/Coding/WM/test",
+    "file": "/home/boss/Documents/Coding/WM/test/main.cpp",
+    "output": "/home/boss/Documents/Coding/WM/test/main.o"
+  }
+]
