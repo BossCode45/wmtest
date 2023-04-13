@@ -3,7 +3,6 @@
 #include <string>
 
 #include <iostream>
-using std::cout, std::endl;
 
 enum MoveDir
 {
@@ -17,7 +16,8 @@ enum CommandArgType
 {
 	STR,
 	NUM,
-	DIR
+	DIR,
+	STR_REST
 };
 
 typedef union
@@ -30,20 +30,20 @@ typedef union
 struct Command
 {
 	const std::string name;
-	const void (*func)(const int argc, const CommandArg* argv);
+	const void (*func)(const CommandArg* argv);
 	const int argc;
-	const CommandArgType* argTypes;
+	CommandArgType* argTypes;
 };
 
 class PreparedCommand
 {
 	public:
-		const void (*func)(const int argc, const CommandArg* argv);
-		int argc = -1;
+		const void (*func)(const CommandArg* argv);
 		const CommandArg* argv = nullptr;
-		PreparedCommand(const void (*func)(const int argc, const CommandArg* argv), int argc, const CommandArg* argv);
+		PreparedCommand(const void (*func)(const CommandArg* argv), const CommandArg* argv);
 		~PreparedCommand();
-		PreparedCommand(PreparedCommand & obj);
+		PreparedCommand(PreparedCommand& obj);
+		PreparedCommand(const PreparedCommand& obj);
 };
 
 class CommandsModule
@@ -51,7 +51,7 @@ class CommandsModule
 	private:
 		std::vector<Command> commandList;
 		std::vector<std::string> splitCommand(std::string command);
-		CommandArg* getCommandArgs(std::vector<std::string> args);
+		CommandArg* getCommandArgs(std::vector<std::string> args, const CommandArgType* argTypes, const int argc);
 	public:   
 		CommandsModule();
 		~CommandsModule();

@@ -5,35 +5,63 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <utility>
 #include <vector>
 #include <regex>
 
+extern CommandsModule commandsModule;
+
 using std::cout, std::endl, std::string, std::vector, std::tolower;
 
-const void printHello(const int argc, const CommandArg* argv)
+const void printHello(const CommandArg* argv)
 {
 	cout << "Hello" << endl;
 }
 
-const void echo(const int argc, const CommandArg* argv)
+const void echo(const CommandArg* argv)
 {
 	cout << "Echo: '" << argv[0].str << '\'' << endl;
 }
 
 std::map<string, PreparedCommand> binds;
-const void bind(const int argc, const CommandArg* argv)
+const void bind(const CommandArg* argv)
 {
-	string cmdstr = "";
+	cout << argv[0].str << endl;
+	cout << argv[1].str << endl;
+	PreparedCommand cmd = commandsModule.prepareCommand(argv[1].str);
+	binds.insert({argv[0].str, cmd});
+}
+
+bool exitNow = false;
+const void exit(const CommandArg* argv)
+{
+	exitNow = true;
+}
+
+const void readBinds(const CommandArg* argv)
+{
+	cout << "Reading binds" << endl;
+	while(exitNow == false)
+	{
+		string key;
+		std::getline(std::cin, key);
+		cout << key << endl;
+		commandsModule.runCommand(binds.find(key)->second);
+	}
 }
 
 CommandsModule::CommandsModule()
 {
-	const Command c = {"printHello", printHello, 0, {}};
-	addCommand(c);
-	CommandArgType* args = new CommandArgType[1];
-	args[0] = STR;
-	const Command c2 = {"echo", echo, 1, args};
-	addCommand(c2);
+	addCommand({"printHello", printHello, 0, {}});
+	CommandArgType* args0 = new CommandArgType[1];
+	args0[0] = STR;
+	addCommand({"echo", echo, 1, args0});
+	CommandArgType* args1 = new CommandArgType[2];
+	args1[0] = STR;
+	args1[1] = STR;
+	addCommand({"bind", bind, 2, args1});
+	addCommand({"exit", exit, 0, {}});
+	addCommand({"readBinds", readBinds, 0, {}});
 }
 CommandsModule::~CommandsModule()
 {
@@ -91,17 +119,27 @@ std::basic_string<T> lowercase(const std::basic_string<T>& s)
     return s2;
 }
 
-CommandArg* getCommandArgs(vector<string> split, const CommandArgType* argTypes)
+CommandArg* CommandsModule::getCommandArgs(vector<string> split, const CommandArgType* argTypes, const int argc)
 {
-	CommandArg* args = new CommandArg[split.size() -1];
-	for(int i = 1; i < split.size(); i++)
+	CommandArg* args = new CommandArg[argc];
+	for(int i = 1; i < argc + 1; i++)
 	{
 		switch(argTypes[i-1])
 		{
 			case STR: args[i-1].str = (char*)split[i].c_str(); break;
 			case NUM: args[i-1].num = std::stoi(split[i]); break;
 			case DIR: args[i-1].dir = LEFT; break;
-			default: cout << "UH OH SOMETHING IS VERY WRONG";
+			case STR_REST:
+			{
+				string rest = "";
+				for(int j = i; j < split.size(); j++)
+				{
+					rest += split[j];
+				}
+				args[i-1].str = (char*)rest.c_str();
+				return args;
+			}
+			default: cout << "UH OH SOMETHING IS VERY WRONG" << endl;
 		}
 	}
 	return args;
@@ -115,8 +153,8 @@ PreparedCommand CommandsModule::prepareCommand(string command)
 		throw Err(CMD_ERR_NOT_FOUND, split[0] + " is not a valid command name");
 	if(cmd->argc > split.size())
 		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
-	CommandArg* args = ::getCommandArgs(split, cmd->argTypes);
-	return PreparedCommand(cmd->func, (int) (split.size() - 1), args);
+	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
+	return PreparedCommand(cmd->func, args);
 }
 
 bool CommandsModule::runCommand(string command)
@@ -127,22 +165,26 @@ bool CommandsModule::runCommand(string command)
 		throw Err(CMD_ERR_NOT_FOUND, split[0] + " is not a valid command name");
 	if(cmd->argc > split.size())
 		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
-	CommandArg* args = ::getCommandArgs(split, cmd->argTypes);
-	cmd->func(split.size() - 1, args);
+	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
+	if(split[0] == "bind")
+	{
+		cout << args[0].str << endl;
+		cout << args[1].str << endl;
+	}
+	cmd->func(args);
 	delete[] args;
 	return true;
 }
 
 bool CommandsModule::runCommand(PreparedCommand command)
 {
-	command.func(command.argc, command.argv);
+	command.func(command.argv);
 	return true;
 }
 
-PreparedCommand::PreparedCommand(const void (*func)(const int argc, const CommandArg* argv), int argc, const CommandArg* argv)
+PreparedCommand::PreparedCommand(const void (*func)(const CommandArg* argv), const CommandArg* argv)
 {
 	this->func = func;
-	this->argc = argc;
 	this->argv = argv;
 }
 PreparedCommand::~PreparedCommand()
@@ -150,10 +192,14 @@ PreparedCommand::~PreparedCommand()
 	if(argv != nullptr)
 		delete[] argv;
 }
-PreparedCommand::PreparedCommand(PreparedCommand & obj)
+PreparedCommand::PreparedCommand(const PreparedCommand& obj)
 {
 	func = obj.func;
-	argc = obj.argc;
+	argv = obj.argv;
+}
+PreparedCommand::PreparedCommand(PreparedCommand& obj)
+{
+	func = obj.func;
 	argv = obj.argv;
 	obj.argv = nullptr;
 }
