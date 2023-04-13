@@ -21,13 +21,12 @@ int main(int argc, char** argv)
 		commandsModule.runCommand("printHello");
 		commandsModule.runCommand("echo test");
 		commandsModule.runCommand("echo 'test 2'");
-		PreparedCommand c = commandsModule.prepareCommand("echo 'test 3 wooah' extra");
-		commandsModule.runCommand(c);
 		commandsModule.runCommand("bind e exit");
-		//commandsModule.runCommand("bind t echo test");
-		//commandsModule.runCommand("bind 2 'echo test'");
-		//commandsModule.runCommand("bind r bind o echo test");
-		//commandsModule.runCommand("readBinds");
+		commandsModule.runCommand("bind t echo test");
+		commandsModule.runCommand("bind 2 'echo test'");
+		commandsModule.runCommand("bind r bind o echo test");
+		commandsModule.runCommand("bind r a");
+		commandsModule.runCommand("readBinds");
 	}
 	catch (Err e)
 	{

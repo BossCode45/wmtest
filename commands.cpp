@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <regex>
+#include <cstring>
 
 extern CommandsModule commandsModule;
 
@@ -23,13 +24,16 @@ const void echo(const CommandArg* argv)
 	cout << "Echo: '" << argv[0].str << '\'' << endl;
 }
 
-std::map<string, PreparedCommand> binds;
+std::map<string, string> binds;
 const void bind(const CommandArg* argv)
 {
-	cout << argv[0].str << endl;
-	cout << argv[1].str << endl;
-	PreparedCommand cmd = commandsModule.prepareCommand(argv[1].str);
-	binds.insert({argv[0].str, cmd});
+	Err e = commandsModule.checkCommand(argv[1].str);
+	if(e.code != NOERR)
+	{
+		e.message = "Binding fail - " + e.message;
+		throw e;
+	}
+	binds.insert({argv[0].str, argv[1].str});
 }
 
 bool exitNow = false;
@@ -45,7 +49,6 @@ const void readBinds(const CommandArg* argv)
 	{
 		string key;
 		std::getline(std::cin, key);
-		cout << key << endl;
 		commandsModule.runCommand(binds.find(key)->second);
 	}
 }
@@ -58,7 +61,7 @@ CommandsModule::CommandsModule()
 	addCommand({"echo", echo, 1, args0});
 	CommandArgType* args1 = new CommandArgType[2];
 	args1[0] = STR;
-	args1[1] = STR;
+	args1[1] = STR_REST;
 	addCommand({"bind", bind, 2, args1});
 	addCommand({"exit", exit, 0, {}});
 	addCommand({"readBinds", readBinds, 0, {}});
@@ -119,7 +122,7 @@ std::basic_string<T> lowercase(const std::basic_string<T>& s)
     return s2;
 }
 
-CommandArg* CommandsModule::getCommandArgs(vector<string> split, const CommandArgType* argTypes, const int argc)
+CommandArg* CommandsModule::getCommandArgs(vector<string>& split, const CommandArgType* argTypes, const int argc)
 {
 	CommandArg* args = new CommandArg[argc];
 	for(int i = 1; i < argc + 1; i++)
@@ -135,8 +138,11 @@ CommandArg* CommandsModule::getCommandArgs(vector<string> split, const CommandAr
 				for(int j = i; j < split.size(); j++)
 				{
 					rest += split[j];
+					if(j != split.size() - 1)
+						rest += " ";
 				}
-				args[i-1].str = (char*)rest.c_str();
+				args[i-1].str = new char[rest.size()];
+				strcpy(args[i-1].str, rest.c_str());
 				return args;
 			}
 			default: cout << "UH OH SOMETHING IS VERY WRONG" << endl;
@@ -145,61 +151,39 @@ CommandArg* CommandsModule::getCommandArgs(vector<string> split, const CommandAr
 	return args;
 }
 
-PreparedCommand CommandsModule::prepareCommand(string command)
-{
-	vector<string> split = splitCommand(command);
-	Command* cmd = lookupCommand(split[0]);
-	if(cmd == nullptr)
-		throw Err(CMD_ERR_NOT_FOUND, split[0] + " is not a valid command name");
-	if(cmd->argc > split.size())
-		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
-	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
-	return PreparedCommand(cmd->func, args);
-}
-
 bool CommandsModule::runCommand(string command)
 {
 	vector<string> split = splitCommand(command);
 	Command* cmd = lookupCommand(split[0]);
 	if(cmd == nullptr)
 		throw Err(CMD_ERR_NOT_FOUND, split[0] + " is not a valid command name");
-	if(cmd->argc > split.size())
+	if(cmd->argc > split.size() - 1)
 		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
 	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
-	if(split[0] == "bind")
-	{
-		cout << args[0].str << endl;
-		cout << args[1].str << endl;
-	}
 	cmd->func(args);
+	for(int i = 0; i < cmd->argc; i++)
+	{
+		if(cmd->argTypes[i] == STR_REST)
+			delete[] args[i].str;
+	}
 	delete[] args;
 	return true;
 }
 
-bool CommandsModule::runCommand(PreparedCommand command)
+Err CommandsModule::checkCommand(string command)
 {
-	command.func(command.argv);
-	return true;
-}
-
-PreparedCommand::PreparedCommand(const void (*func)(const CommandArg* argv), const CommandArg* argv)
-{
-	this->func = func;
-	this->argv = argv;
-}
-PreparedCommand::~PreparedCommand()
-{ 
-	if(argv != nullptr)
-		delete[] argv;
-}
-PreparedCommand::PreparedCommand(const PreparedCommand& obj)
-{
-	func = obj.func;
-	argv = obj.argv;
-}
-PreparedCommand::PreparedCommand(PreparedCommand& obj)
-{
-	func = obj.func;
-	argv = obj.argv;
-	obj.argv = nullptr;
+	vector<string> split = splitCommand(command);
+	Command* cmd = lookupCommand(split[0]);
+	if(cmd == nullptr)
+		return Err(CMD_ERR_NOT_FOUND, split[0] + " is not a valid command name");
+	if(cmd->argc > split.size())
+		return Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
+	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
+	for(int i = 0; i < cmd->argc; i++)
+	{
+		if(cmd->argTypes[i] == STR_REST)
+			delete[] args[i].str;
+	}
+	delete[] args;
+	return Err(NOERR, "");
 }

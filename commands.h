@@ -1,8 +1,9 @@
 #pragma once
+
+#include "error.h"
+
 #include <vector>
 #include <string>
-
-#include <iostream>
 
 enum MoveDir
 {
@@ -34,30 +35,17 @@ struct Command
 	const int argc;
 	CommandArgType* argTypes;
 };
-
-class PreparedCommand
-{
-	public:
-		const void (*func)(const CommandArg* argv);
-		const CommandArg* argv = nullptr;
-		PreparedCommand(const void (*func)(const CommandArg* argv), const CommandArg* argv);
-		~PreparedCommand();
-		PreparedCommand(PreparedCommand& obj);
-		PreparedCommand(const PreparedCommand& obj);
-};
-
 class CommandsModule
 {
 	private:
 		std::vector<Command> commandList;
 		std::vector<std::string> splitCommand(std::string command);
-		CommandArg* getCommandArgs(std::vector<std::string> args, const CommandArgType* argTypes, const int argc);
+		CommandArg* getCommandArgs(std::vector<std::string>& args, const CommandArgType* argTypes, const int argc);
 	public:   
 		CommandsModule();
 		~CommandsModule();
 		void addCommand(Command command);
 		Command* lookupCommand(std::string name);
-		PreparedCommand prepareCommand(std::string command);
 		bool runCommand(std::string command);
-		bool runCommand(PreparedCommand command);
+		Err checkCommand(std::string command);
 };
