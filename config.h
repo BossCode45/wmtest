@@ -1,17 +1,10 @@
 #pragma once
 
+#include "commands.h"
 #include <X11/X.h>
 #include <X11/keysym.h>
 
 #include <string>
-
-enum MoveDir
-{
-	Up,
-	Right,
-	Down,
-	Left
-};
 
 typedef union
 {
@@ -38,9 +31,9 @@ KEYCOM(focChange);
 KEYCOM(reload);
 
 class Config
-{   
+{  
 	public:
-		Config();
+		Config(CommandsModule& commandsModule);
 		~Config();
 		void free();
 	
@@ -65,4 +58,7 @@ class Config
 		// Keybinds
 		KeyBind* binds;
 		int bindsc;
+	private:
+		CommandsModule& commandsModule;
+		bool loaded = false;
 };

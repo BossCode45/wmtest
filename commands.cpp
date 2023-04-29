@@ -151,7 +151,7 @@ CommandArg* CommandsModule::getCommandArgs(vector<string>& split, const CommandA
 	return args;
 }
 
-bool CommandsModule::runCommand(string command)
+void CommandsModule::runCommand(string command)
 {
 	vector<string> split = splitCommand(command);
 	Command* cmd = lookupCommand(split[0]);
@@ -160,14 +160,26 @@ bool CommandsModule::runCommand(string command)
 	if(cmd->argc > split.size() - 1)
 		throw Err(CMD_ERR_WRONG_ARGS, command + " is the wrong args");
 	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
-	cmd->func(args);
+	try
+	{
+		cmd->func(args);
+	}
+	catch (Err e)
+	{
+		for(int i = 0; i < cmd->argc; i++)
+		{
+			if(cmd->argTypes[i] == STR_REST)
+				delete[] args[i].str;
+		}
+		delete[] args;
+		throw e;
+	}
 	for(int i = 0; i < cmd->argc; i++)
 	{
 		if(cmd->argTypes[i] == STR_REST)
 			delete[] args[i].str;
 	}
 	delete[] args;
-	return true;
 }
 
 Err CommandsModule::checkCommand(string command)

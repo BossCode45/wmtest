@@ -1,7 +1,11 @@
 #include "config.h"
+#include "commands.h"
 
 #include <X11/Xlib.h>
 
+#include <cstdio>
+#include <fstream>
+#include <ios>
 #include <string>
 #include <map>
 #include <vector>
@@ -50,7 +54,8 @@ map<string, void(*) (const KeyArg arg)> funcNameMap = {
 };
 
 
-Config::Config()
+Config::Config(CommandsModule& commandsModule)
+	: commandsModule(commandsModule)
 {
 }
 
@@ -68,6 +73,22 @@ std::vector<string> split (const string &s, char delim) {
 
 void Config::loadFromFile(string path)
 {
+	string cmd;
+	int line = 0;
+	std::ifstream config(path);
+	while(getline(config, cmd))
+	{
+		try
+		{
+			commandsModule.runCommand(cmd);
+		}
+		catch (Err e)
+		{
+			cout << "Error in config (line " << line <<  "): " << e.code << endl;
+			cout << "\tMessage: " << e.message << endl;
+		}
+		line++;
+	}
 }
 
 Config::~Config()
@@ -76,6 +97,8 @@ Config::~Config()
 }
 void Config::free()
 {
+	if(!loaded)
+		return;
 	delete[] startupBash;
 	delete[] workspaceNames;
 	for(int i = 0; i < screenPreferencesc; i++)

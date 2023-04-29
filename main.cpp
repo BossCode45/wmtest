@@ -3,7 +3,7 @@
 
 #include "commands.h"
 #include "error.h"
-//#include "config.h"
+#include "config.h"
 CommandsModule commandsModule;
 
 using std::cout, std::endl, std::cerr, std::string, std::vector;
@@ -14,18 +14,11 @@ int main(int argc, char** argv)
 	std::string pathAfterHome = "/.config/YATwm/config.toml";
 	std::string file = home + pathAfterHome;
 
-	//Config cfg;
+	Config cfg(commandsModule);
 
+	cfg.loadFromFile("config");
 	try
 	{
-		commandsModule.runCommand("printHello");
-		commandsModule.runCommand("echo test");
-		commandsModule.runCommand("echo 'test 2'");
-		commandsModule.runCommand("bind e exit");
-		commandsModule.runCommand("bind t echo test");
-		commandsModule.runCommand("bind 2 'echo test'");
-		commandsModule.runCommand("bind r bind o echo test");
-		commandsModule.runCommand("bind r a");
 		commandsModule.runCommand("readBinds");
 	}
 	catch (Err e)

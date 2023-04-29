@@ -46,6 +46,6 @@ class CommandsModule
 		~CommandsModule();
 		void addCommand(Command command);
 		Command* lookupCommand(std::string name);
-		bool runCommand(std::string command);
+		void runCommand(std::string command);
 		Err checkCommand(std::string command);
 };
