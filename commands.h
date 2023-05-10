@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <string>
+#include <any>
+#include <functional>
 
 enum MoveDir
 {
@@ -31,9 +33,10 @@ typedef union
 struct Command
 {
 	const std::string name;
-	const void (*func)(const CommandArg* argv);
+	const std::function<void(std::any&, const CommandArg* argv)> func;
 	const int argc;
 	CommandArgType* argTypes;
+	std::any* module;
 };
 class CommandsModule
 {
@@ -41,6 +44,8 @@ class CommandsModule
 		std::vector<Command> commandList;
 		std::vector<std::string> splitCommand(std::string command);
 		CommandArg* getCommandArgs(std::vector<std::string>& args, const CommandArgType* argTypes, const int argc);
+		const void printHello(const CommandArg* argv);
+		const void echo(const CommandArg* argv);
 	public:   
 		CommandsModule();
 		~CommandsModule();

@@ -18,9 +18,9 @@ $(OBJS_DIR)/%.o : $(SOURCE_DIR)/%.cpp
 
 #Files to be compiled
 $(OBJS_DIR)/main.o: $(SOURCE_FILES) $(SOURCE_HEADERS)
-$(OBJS_DIR)/config.o: $(SOURCE_DIR)/config.cpp $(SOURCE_DIR)/config.h
 $(OBJS_DIR)/commands.o: $(SOURCE_DIR)/commands.cpp $(SOURCE_DIR)/commands.h
-
+$(OBJS_DIR)/config.o: $(SOURCE_DIR)/config.cpp $(SOURCE_DIR)/config.h
+$(OBJS_DIR)/keybinds.o: $(SOURCE_DIR)/keybinds.cpp $(SOURCE_DIR)/keybinds.h $(SOURCE_DIR)/commands.h
 clean:
 	rm $(OBJS_DIR)/*.o 
 	rm $(OUT_DIR)/$(EXEC)

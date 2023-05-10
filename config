@@ -1,0 +1,3 @@
+bind e exit
+bind q exit
+bind o echo test

@@ -14,57 +14,22 @@ extern CommandsModule commandsModule;
 
 using std::cout, std::endl, std::string, std::vector, std::tolower;
 
-const void printHello(const CommandArg* argv)
+const void CommandsModule::printHello(const CommandArg* argv)
 {
 	cout << "Hello" << endl;
 }
 
-const void echo(const CommandArg* argv)
+const void CommandsModule::echo(const CommandArg* argv)
 {
 	cout << "Echo: '" << argv[0].str << '\'' << endl;
 }
 
-std::map<string, string> binds;
-const void bind(const CommandArg* argv)
-{
-	Err e = commandsModule.checkCommand(argv[1].str);
-	if(e.code != NOERR)
-	{
-		e.message = "Binding fail - " + e.message;
-		throw e;
-	}
-	binds.insert({argv[0].str, argv[1].str});
-}
-
-bool exitNow = false;
-const void exit(const CommandArg* argv)
-{
-	exitNow = true;
-}
-
-const void readBinds(const CommandArg* argv)
-{
-	cout << "Reading binds" << endl;
-	while(exitNow == false)
-	{
-		string key;
-		std::getline(std::cin, key);
-		commandsModule.runCommand(binds.find(key)->second);
-	}
-}
-
 CommandsModule::CommandsModule()
 {
-	addCommand({"printHello", printHello, 0, {}});
+	addCommand({"printHello", (const void*(std::any::*)(const CommandArg* argv))&CommandsModule::printHello, 0, {}, (std::any*)this});
 	CommandArgType* args0 = new CommandArgType[1];
 	args0[0] = STR;
-	addCommand({"echo", echo, 1, args0});
-	CommandArgType* args1 = new CommandArgType[2];
-	args1[0] = STR;
-	args1[1] = STR_REST;
-	addCommand({"bind", bind, 2, args1});
-	addCommand({"exit", exit, 0, {}});
-	addCommand({"readBinds", readBinds, 0, {}});
+	addCommand({"echo", (const void*(std::any::*)(const CommandArg* argv))&CommandsModule::echo, 1, args0, (std::any*)this});
 }
 CommandsModule::~CommandsModule()
 {
@@ -162,7 +127,7 @@ void CommandsModule::runCommand(string command)
 	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
 	try
 	{
-		cmd->func(args);
+		cmd->func(*cmd->module, args);
 	}
 	catch (Err e)
 	{

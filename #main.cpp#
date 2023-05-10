@@ -4,7 +4,6 @@
 #include "commands.h"
 #include "error.h"
 #include "config.h"
-#include "keybinds.h"
 CommandsModule commandsModule;
 
 using std::cout, std::endl, std::cerr, std::string, std::vector;
@@ -16,7 +15,6 @@ int main(int argc, char** argv)
 	std::string file = home + pathAfterHome;
 
 	Config cfg(commandsModule);
-	KeybindsModule keys(commandsModule);
 
 	cfg.loadFromFile("config");
 	try
