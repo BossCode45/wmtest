@@ -2,9 +2,7 @@
 
 #include "keybinds.h"
 
-using std::map, std::string, std::cin, std::cout, std::endl;
-
-#define mac(T, F) (const void*(std::any::*)(const CommandArg* argv))&T::F
+using std::string, std::cin, std::cout, std::endl;
 
 KeybindsModule::KeybindsModule(CommandsModule& commandsModule)
 	:commandsModule(commandsModule)
@@ -12,9 +10,9 @@ KeybindsModule::KeybindsModule(CommandsModule& commandsModule)
 	CommandArgType* bindArgs = new CommandArgType[2];
 	bindArgs[0] = STR;
 	bindArgs[1] = STR_REST;
-	commandsModule.addCommand({"bind", mac(KeybindsModule, bind), 2, bindArgs, (std::any*)this});
-	commandsModule.addCommand({"exit", mac(KeybindsModule, exit), 0, {}, (std::any*)this});
-	commandsModule.addCommand({"readBinds", mac(KeybindsModule, readBinds), 0, {}, (std::any*)this});
+	commandsModule.addCommand("bind", &KeybindsModule::bind, 2, bindArgs, this);
+	commandsModule.addCommand("exit", &KeybindsModule::exit, 0, {}, this);
+	commandsModule.addCommand("readBinds", &KeybindsModule::readBinds, 0, {}, this);
 	exitNow = false;
 }
 

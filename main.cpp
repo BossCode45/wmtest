@@ -5,6 +5,7 @@
 #include "error.h"
 #include "config.h"
 #include "keybinds.h"
+
 CommandsModule commandsModule;
 
 using std::cout, std::endl, std::cerr, std::string, std::vector;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 #include "commands.h"
@@ -13,7 +13,7 @@ class KeybindsModule {
 		const void readBinds(const CommandArg* argv);
 		const void exit(const CommandArg* argv);
 	private:
-		std::map<std::string, std::string> binds;
+		std::unordered_map<std::string, std::string> binds;
 		bool exitNow;
 		CommandsModule& commandsModule;
 };

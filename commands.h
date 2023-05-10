@@ -49,8 +49,19 @@ class CommandsModule
 	public:   
 		CommandsModule();
 		~CommandsModule();
-		void addCommand(Command command);
+		template <class T>
+		void addCommand(std::string name, const void(T::*func)(const CommandArg*), const int argc, CommandArgType* argTypes, T* module);
+		void addCommand(Command c);
 		Command* lookupCommand(std::string name);
 		void runCommand(std::string command);
 		Err checkCommand(std::string command);
 };
+
+// YES I KNOW THIS IS BAD
+// but it needs to be done this way
+template <class T>
+void CommandsModule::addCommand(std::string name, const void(T::*func)(const CommandArg*), const int argc, CommandArgType* argTypes, T* module)
+{
+	Command c = {name, (const void*(std::any::*)(const CommandArg* argv)) func, argc, argTypes, (std::any*)module};
+	commandList.push_back(c);
+}

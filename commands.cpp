@@ -10,8 +10,6 @@
 #include <regex>
 #include <cstring>
 
-extern CommandsModule commandsModule;
-
 using std::cout, std::endl, std::string, std::vector, std::tolower;
 
 const void CommandsModule::printHello(const CommandArg* argv)
@@ -26,18 +24,18 @@ const void CommandsModule::echo(const CommandArg* argv)
 
 CommandsModule::CommandsModule()
 {
-	addCommand({"printHello", (const void*(std::any::*)(const CommandArg* argv))&CommandsModule::printHello, 0, {}, (std::any*)this});
+	addCommand("printHello", &CommandsModule::printHello, 0, {}, this);
 	CommandArgType* args0 = new CommandArgType[1];
-	args0[0] = STR;
-	addCommand({"echo", (const void*(std::any::*)(const CommandArg* argv))&CommandsModule::echo, 1, args0, (std::any*)this});
+	args0[0] = STR_REST;
+	addCommand("echo", &CommandsModule::echo, 1, args0, this);
 }
 CommandsModule::~CommandsModule()
 {
 }
 
-void CommandsModule::addCommand(Command command)
+void CommandsModule::addCommand(Command c)
 {
-	commandList.push_back(command);
+	commandList.push_back(c);
 }
 
 struct NameMatches
