@@ -21,14 +21,14 @@ struct KeyBind
 	KeyArg args;
 };
 
-#define KEYCOM(X) \
-	void X (const KeyArg arg)
-KEYCOM(exit);
-KEYCOM(spawn);
-KEYCOM(changeWS);
-KEYCOM(wToWS);
-KEYCOM(focChange);
-KEYCOM(reload);
+struct Worksace
+{
+	std::string name;
+	int* screenPreferences;
+};
+
+#define COMMAND(X) \
+	const void X (const CommandArg* argv)
 
 class Config
 {  
@@ -48,6 +48,7 @@ class Config
 		std::string logFile;
 
 		// Workspaces
+		std::vector<Worksace> workspaces;
 		int numWS;
 		std::string* workspaceNames;
 		int workspaceNamesc;
@@ -58,6 +59,20 @@ class Config
 		// Keybinds
 		KeyBind* binds;
 		int bindsc;
+
+		// Config Commands
+		COMMAND(gapsCmd);
+		COMMAND(outerGapsCmd);
+		COMMAND(logFileCmd);
+		COMMAND(addWorkspaceCmd);
+
+		// Keybind Commands
+		COMMAND(exit);
+		COMMAND(spawn);
+		COMMAND(changeWS);
+		COMMAND(wToWS);
+		COMMAND(focChange);
+		COMMAND(reload);
 	private:
 		CommandsModule& commandsModule;
 		bool loaded = false;

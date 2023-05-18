@@ -1,6 +1,6 @@
 .PHONY: clean
 CXX := g++
-CXXFLAGS := -std=c++17 #-g # -fsanitize=address -fno-omit-frame-pointer
+CXXFLAGS := -std=c++17  #-g # -fsanitize=address -fno-omit-frame-pointer
 LINKFLAGS := -lX11
 OBJS_DIR := .
 OUT_DIR := .

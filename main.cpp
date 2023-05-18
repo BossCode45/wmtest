@@ -20,6 +20,7 @@ int main(int argc, char** argv)
 	KeybindsModule keys(commandsModule);
 
 	cfg.loadFromFile("config");
+	cout << cfg.gaps << " " << cfg.outerGaps << endl;
 	try
 	{
 		commandsModule.runCommand("readBinds");

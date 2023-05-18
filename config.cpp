@@ -7,69 +7,81 @@
 #include <fstream>
 #include <ios>
 #include <string>
-#include <map>
 #include <vector>
 #include <sstream>
 
 //Just for testing
 #include <iostream>
 
-using std::map, std::string;
+using std::string;
 
 // For testing
-using std::cout, std::endl, std::cerr;
+using std::cout, std::endl;
 
-void exit(const KeyArg arg)
+const void Config::exit(const CommandArg* argv)
 {
 	cout << "exit called" << endl;
 }
-void spawn(const KeyArg arg)
+const void Config::spawn(const CommandArg* argv)
 {
-	cout << "spawn called " << arg.str << endl;
+	cout << "spawn called " << argv[0].str << endl;
 }
-void changeWS(const KeyArg arg)
+const void Config::changeWS(const CommandArg* argv)
 {
 	cout << "changeWS called" << endl;
 }
-void wToWS(const KeyArg arg)
+const void Config::wToWS(const CommandArg* argv)
 {
 	cout << "wToWS called" << endl;
 }
-void focChange(const KeyArg arg)
+const void Config::focChange(const CommandArg* argv)
 {
 	cout << "focChange called" << endl;
 }
-void reload(const KeyArg arg)
+const void Config::reload(const CommandArg* argv)
 {
 	cout << "reload called" << endl;
 }
 
-map<string, void(*) (const KeyArg arg)> funcNameMap = {
-	{"exit", exit},
-	{"spawn", spawn},
-	{"changeWS", changeWS},
-	{"wToWS", wToWS},
-	{"focChange", focChange},
-	{"reload", reload}
-};
+const void Config::gapsCmd(const CommandArg* argv)
+{
+	gaps = argv[0].num;
+}
 
+const void Config::outerGapsCmd(const CommandArg* argv)
+{
+	outerGaps = argv[0].num;
+}
+
+const void Config::logFileCmd(const CommandArg* argv)
+{
+	logFile = argv[0].str;
+}
 
 Config::Config(CommandsModule& commandsModule)
 	: commandsModule(commandsModule)
 {
+	//Register commands for keybinds
+	CommandArgType* spawnArgs = new CommandArgType[1];
+	spawnArgs[0] = STR;
+	commandsModule.addCommand("spawn", &Config::spawn, 1, spawnArgs, this);
+
+	//Register commands for config
+	CommandArgType* gapsArgs = new CommandArgType[1];
+	gapsArgs[0] = NUM;
+	commandsModule.addCommand("gaps", &Config::gapsCmd, 1, gapsArgs, this);
+	commandsModule.addCommand("outergaps", &Config::outerGapsCmd, 1, gapsArgs, this);
+	CommandArgType* logFileArgs = new CommandArgType[1];
+	logFileArgs[0] = STR_REST;
+	commandsModule.addCommand("logfile", &Config::logFileCmd, 1, logFileArgs, this);
+
+	//Set defaults
+	gaps = 3;
+	outerGaps = 3;
+	logFile = "/tmp/yatlog.txt";
+	numWS = 10;
 }
 
-std::vector<string> split (const string &s, char delim) {
-	std::vector<string> result;
-	std::stringstream ss (s);
-    string item;
-
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
-    }
-
-    return result;
-}
 
 void Config::loadFromFile(string path)
 {
@@ -78,6 +90,8 @@ void Config::loadFromFile(string path)
 	std::ifstream config(path);
 	while(getline(config, cmd))
 	{
+		if(cmd.at(0) == '#')
+			continue;
 		try
 		{
 			commandsModule.runCommand(cmd);
