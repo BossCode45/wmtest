@@ -1,0 +1,4 @@
+*.o
+.cache/*
+.cache
+main

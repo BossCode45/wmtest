@@ -6,3 +6,5 @@ bind x spawn "test stuff woo!"
 spawn "nm-applet"
 gaps 3
 outergaps 3
+addworkspace "1: A" 1
+addworkspace "5: A" 2 1

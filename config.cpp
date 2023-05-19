@@ -58,6 +58,10 @@ const void Config::logFileCmd(const CommandArg* argv)
 	logFile = argv[0].str;
 }
 
+const void Config::addWorkspaceCmd(const CommandArg* argv)
+{
+}
+
 Config::Config(CommandsModule& commandsModule)
 	: commandsModule(commandsModule)
 {
