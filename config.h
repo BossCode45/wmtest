@@ -21,10 +21,11 @@ struct KeyBind
 	KeyArg args;
 };
 
-struct Worksace
+struct Workspace
 {
 	std::string name;
 	int* screenPreferences;
+	int screenPreferencesc;
 };
 
 #define COMMAND(X) \
@@ -48,7 +49,7 @@ class Config
 		std::string logFile;
 
 		// Workspaces
-		std::vector<Worksace> workspaces;
+		std::vector<Workspace> workspaces;
 		int numWS;
 		std::string* workspaceNames;
 		int workspaceNamesc;

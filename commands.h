@@ -14,19 +14,25 @@ enum MoveDir
 	DOWN,
 	LEFT
 };
-
 enum CommandArgType
 {
 	STR,
 	NUM,
 	DIR,
-	STR_REST
+	STR_REST,
+	NUM_ARR_REST
 };
 
+struct NumArr
+{
+	int* arr;
+	int size;
+};
 typedef union
 {
 	char* str;
 	int num;
+	NumArr numArr;
 	MoveDir dir;
 } CommandArg;
 

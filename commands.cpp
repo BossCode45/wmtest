@@ -31,6 +31,12 @@ CommandsModule::CommandsModule()
 }
 CommandsModule::~CommandsModule()
 {
+	for(Command c : commandList)
+	{
+		// This is probably needed but its not working
+		//if(c.argc > 0)
+			//delete[] c.argTypes;
+	}
 }
 
 void CommandsModule::addCommand(Command c)
@@ -108,6 +114,16 @@ CommandArg* CommandsModule::getCommandArgs(vector<string>& split, const CommandA
 				strcpy(args[i-1].str, rest.c_str());
 				return args;
 			}
+			case NUM_ARR_REST:
+			{
+				int* rest = new int[split.size() - i];
+				for(int j = 0; j < split.size() - i; j++)
+				{
+					rest[j] = std::stoi(split[j + i]);
+				}
+				args[i-1].numArr = {rest, (int) split.size() - i};
+				return args;
+			}
 			default: cout << "UH OH SOMETHING IS VERY WRONG" << endl;
 		}
 	}
@@ -156,7 +172,7 @@ Err CommandsModule::checkCommand(string command)
 	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
 	for(int i = 0; i < cmd->argc; i++)
 	{
-		if(cmd->argTypes[i] == STR_REST)
+		if(cmd->argTypes[i] == STR_REST || cmd->argTypes[i] == NUM_ARR_REST)
 			delete[] args[i].str;
 	}
 	delete[] args;

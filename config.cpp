@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <ios>
 #include <string>
@@ -60,6 +61,9 @@ const void Config::logFileCmd(const CommandArg* argv)
 
 const void Config::addWorkspaceCmd(const CommandArg* argv)
 {
+	int* prefs = new int[argv[1].numArr.size];
+	memcpy(prefs, argv[1].numArr.arr, argv[1].numArr.size * sizeof(int));
+	workspaces.push_back({argv[0].str, prefs, argv[1].numArr.size});
 }
 
 Config::Config(CommandsModule& commandsModule)
@@ -78,12 +82,15 @@ Config::Config(CommandsModule& commandsModule)
 	CommandArgType* logFileArgs = new CommandArgType[1];
 	logFileArgs[0] = STR_REST;
 	commandsModule.addCommand("logfile", &Config::logFileCmd, 1, logFileArgs, this);
+	CommandArgType* addWorkspaceArgs = new CommandArgType[2];
+	addWorkspaceArgs[0] = STR;
+	addWorkspaceArgs[1] = NUM_ARR_REST;
+	commandsModule.addCommand("addworkspace", &Config::addWorkspaceCmd, 2, addWorkspaceArgs, this);
 
 	//Set defaults
 	gaps = 3;
 	outerGaps = 3;
 	logFile = "/tmp/yatlog.txt";
-	numWS = 10;
 }
 
 

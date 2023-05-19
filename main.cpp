@@ -8,7 +8,7 @@
 
 CommandsModule commandsModule;
 
-using std::cout, std::endl, std::cerr, std::string, std::vector;
+using std::cout, std::endl, std::string;
 
 int main(int argc, char** argv)
 {
@@ -21,6 +21,15 @@ int main(int argc, char** argv)
 
 	cfg.loadFromFile("config");
 	cout << cfg.gaps << " " << cfg.outerGaps << endl;
+	for(Workspace w : cfg.workspaces)
+	{
+		cout << w.name;
+		for(int i = 0; i < w.screenPreferencesc; i++)
+		{
+			cout << " " << w.screenPreferences[i];
+		}
+		cout << endl;
+	}
 	try
 	{
 		commandsModule.runCommand("readBinds");
