@@ -41,6 +41,10 @@ CommandsModule::~CommandsModule()
 
 void CommandsModule::addCommand(Command c)
 {
+	if(lookupCommand(c.name) != nullptr)
+	{
+		cout << "Duplicate command: " << c.name << endl;
+	}
 	commandList.push_back(c);
 }
 

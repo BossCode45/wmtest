@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <unistd.h>
+#include <fcntl.h>
 
 //Just for testing
 #include <iostream>
@@ -25,7 +27,15 @@ const void Config::exit(const CommandArg* argv)
 }
 const void Config::spawn(const CommandArg* argv)
 {
-	cout << "spawn called " << argv[0].str << endl;
+	if(fork() == 0)
+	{
+		int null = open("/dev/null", O_WRONLY);
+		dup2(null, 0);
+		dup2(null, 1);
+		dup2(null, 2);
+		system(argv[0].str);
+		exit(0);
+	}
 }
 const void Config::changeWS(const CommandArg* argv)
 {
@@ -71,7 +81,7 @@ Config::Config(CommandsModule& commandsModule)
 {
 	//Register commands for keybinds
 	CommandArgType* spawnArgs = new CommandArgType[1];
-	spawnArgs[0] = STR;
+	spawnArgs[0] = STR_REST;
 	commandsModule.addCommand("spawn", &Config::spawn, 1, spawnArgs, this);
 
 	//Register commands for config

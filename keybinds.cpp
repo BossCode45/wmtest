@@ -32,6 +32,7 @@ const void KeybindsModule::readBinds(const CommandArg* argv)
 	while(exitNow == false)
 	{
 		string key;
+		cout << "> ";
 		std::getline(std::cin, key);
 		commandsModule.runCommand(binds.find(key)->second);
 	}
@@ -40,4 +41,5 @@ const void KeybindsModule::readBinds(const CommandArg* argv)
 const void KeybindsModule::exit(const CommandArg* argv)
 {
 	exitNow = true;
+	cout << "Exiting..." << endl;
 }

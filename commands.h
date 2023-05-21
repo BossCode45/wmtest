@@ -69,5 +69,5 @@ template <class T>
 void CommandsModule::addCommand(std::string name, const void(T::*func)(const CommandArg*), const int argc, CommandArgType* argTypes, T* module)
 {
 	Command c = {name, (const void*(std::any::*)(const CommandArg* argv)) func, argc, argTypes, (std::any*)module};
-	commandList.push_back(c);
+	addCommand(c);
 }

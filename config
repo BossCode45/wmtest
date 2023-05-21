@@ -2,9 +2,11 @@
 bind e exit
 bind q exit
 bind o echo test
-bind x spawn "test stuff woo!"
-spawn "nm-applet"
-gaps 3
-outergaps 3
+bind x spawn notify-send stuff
+spawn "notify-send test"
+gaps 10
+outergaps 10
 addworkspace "1: A" 1
+addworkspace "2: B" 1
 addworkspace "5: A" 2 1
+addworkspace "6: B" 2 1
