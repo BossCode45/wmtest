@@ -25,6 +25,21 @@ const void Config::exit(const CommandArg* argv)
 {
 	cout << "exit called" << endl;
 }
+const void Config::spawn_once(const CommandArg* argv)
+{
+	if(loaded)
+		return;
+	if(fork() == 0)
+	{
+		int null = open("/dev/null", O_WRONLY);
+		dup2(null, 0);
+		dup2(null, 1);
+		dup2(null, 2);
+		system(argv[0].str);
+		exit(0);
+	}
+}
+
 const void Config::spawn(const CommandArg* argv)
 {
 	if(fork() == 0)
@@ -51,7 +66,8 @@ const void Config::focChange(const CommandArg* argv)
 }
 const void Config::reload(const CommandArg* argv)
 {
-	cout << "reload called" << endl;
+	cout << "Reloading config" << endl;
+	reloadFile();
 }
 
 const void Config::gapsCmd(const CommandArg* argv)
@@ -83,6 +99,8 @@ Config::Config(CommandsModule& commandsModule)
 	CommandArgType* spawnArgs = new CommandArgType[1];
 	spawnArgs[0] = STR_REST;
 	commandsModule.addCommand("spawn", &Config::spawn, 1, spawnArgs, this);
+	commandsModule.addCommand("spawn_once", &Config::spawn_once, 1, spawnArgs, this);
+	commandsModule.addCommand("reload", &Config::reload, 0, {}, this);
 
 	//Register commands for config
 	CommandArgType* gapsArgs = new CommandArgType[1];
@@ -96,16 +114,25 @@ Config::Config(CommandsModule& commandsModule)
 	addWorkspaceArgs[0] = STR;
 	addWorkspaceArgs[1] = NUM_ARR_REST;
 	commandsModule.addCommand("addworkspace", &Config::addWorkspaceCmd, 2, addWorkspaceArgs, this);
+}
 
+void Config::reloadFile()
+{
+	if(!loaded)
+		return;
+	loadFromFile(file);
+}
+
+void Config::loadFromFile(string path)
+{
+	file = path;
 	//Set defaults
 	gaps = 3;
 	outerGaps = 3;
 	logFile = "/tmp/yatlog.txt";
-}
 
+	//Probably need something for workspaces and binds too...
 
-void Config::loadFromFile(string path)
-{
 	string cmd;
 	int line = 0;
 	std::ifstream config(path);
@@ -124,6 +151,7 @@ void Config::loadFromFile(string path)
 		}
 		line++;
 	}
+	loaded = true;
 }
 
 Config::~Config()
@@ -134,11 +162,8 @@ void Config::free()
 {
 	if(!loaded)
 		return;
-	delete[] startupBash;
-	delete[] workspaceNames;
-	for(int i = 0; i < screenPreferencesc; i++)
+	for(Workspace w : workspaces)
 	{
-		delete[] screenPreferences[i];
+		delete [] w.screenPreferences;
 	}
-	delete[] screenPreferences;
 }

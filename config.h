@@ -39,6 +39,7 @@ class Config
 		void free();
 	
 		void loadFromFile(std::string path);
+		void reloadFile();
 		// Startup
 		std::string* startupBash;
 		int startupBashc;
@@ -70,6 +71,7 @@ class Config
 		// Keybind Commands
 		COMMAND(exit);
 		COMMAND(spawn);
+		COMMAND(spawn_once);
 		COMMAND(changeWS);
 		COMMAND(wToWS);
 		COMMAND(focChange);
@@ -77,4 +79,5 @@ class Config
 	private:
 		CommandsModule& commandsModule;
 		bool loaded = false;
+		std::string file;
 };

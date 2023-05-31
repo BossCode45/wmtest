@@ -40,6 +40,7 @@ struct Command
 {
 	const std::string name;
 	const std::function<void(std::any&, const CommandArg* argv)> func;
+	const void(*staticFunc)(const CommandArg* argv);
 	const int argc;
 	CommandArgType* argTypes;
 	std::any* module;
@@ -57,6 +58,7 @@ class CommandsModule
 		~CommandsModule();
 		template <class T>
 		void addCommand(std::string name, const void(T::*func)(const CommandArg*), const int argc, CommandArgType* argTypes, T* module);
+		void addCommand(std::string name, const void(*func)(const CommandArg*), const int argc, CommandArgType* argTypes);
 		void addCommand(Command c);
 		Command* lookupCommand(std::string name);
 		void runCommand(std::string command);
@@ -68,6 +70,6 @@ class CommandsModule
 template <class T>
 void CommandsModule::addCommand(std::string name, const void(T::*func)(const CommandArg*), const int argc, CommandArgType* argTypes, T* module)
 {
-	Command c = {name, (const void*(std::any::*)(const CommandArg* argv)) func, argc, argTypes, (std::any*)module};
+	Command c = {name, (const void*(std::any::*)(const CommandArg* argv)) func, nullptr, argc, argTypes, (std::any*)module};
 	addCommand(c);
 }

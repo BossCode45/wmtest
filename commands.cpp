@@ -2,6 +2,7 @@
 #include "error.h"
 
 #include <cctype>
+#include <functional>
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -47,7 +48,11 @@ void CommandsModule::addCommand(Command c)
 	}
 	commandList.push_back(c);
 }
-
+void CommandsModule::addCommand(std::string name, const void(*func)(const CommandArg*), const int argc, CommandArgType* argTypes)
+{
+	Command c = {name, nullptr, func, argc, argTypes, nullptr};
+	addCommand(c);
+}
 struct NameMatches
 {
 	NameMatches(string s): s_{s} {}
@@ -145,7 +150,10 @@ void CommandsModule::runCommand(string command)
 	CommandArg* args = getCommandArgs(split, cmd->argTypes, cmd->argc);
 	try
 	{
-		cmd->func(*cmd->module, args);
+		if(cmd->module == nullptr)
+			cmd->staticFunc(args);
+		else
+			cmd->func(*cmd->module, args);
 	}
 	catch (Err e)
 	{
